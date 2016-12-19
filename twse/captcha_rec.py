@@ -12,8 +12,8 @@ class captcha_recognize:
         return self.lable[np.where(onehot == 1)[0][0]]
 
     def load_model(self):
-        self.model = model_from_json(open('cnn_captcha.json').read())
-        self.model.load_weights('TWSE_captcha_weights.h5')
+        self.model = model_from_json(open('twse/cnn_captcha.json').read())
+        self.model.load_weights('twse/TWSE_captcha_weights.h5')
 
         self.model.compile(loss='categorical_crossentropy',
                            optimizer='sgd',
@@ -31,7 +31,7 @@ class captcha_recognize:
         return X
 
     def captcha_predict(self, X):
-        if type(self.model) != Sequential:
+        if not self.model:
             self.load_model()
         ans = self.model.predict(X)
         captcha = ''
