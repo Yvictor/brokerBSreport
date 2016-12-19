@@ -1,3 +1,9 @@
+'''
+Created on Dec 18, 2016
+@author: Yvictor
+'''
+
+
 from keras.models import model_from_json
 import numpy as np
 
