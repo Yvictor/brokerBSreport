@@ -209,9 +209,9 @@ class twseBSreport:
     def singleprocess(self, stockid):
         anscor = 0
         repostcount = 0
-        filename = str(stockid) + "_" + ('').join(str(self.__getdate()).split('-'))
-        if os.path.exists(self.curpath+'origin_%s.h5'%('').join(str(dat).split('-'))):
-            if stockid not in [int(k.split('/')[1]) for k in pd.HDFStore(self.curpath+'origin_%s.h5'%('').join(str(dat).split('-'))).keys()]:
+        filepath = self.curpath+'origin_%s.h5'%('').join(str(self.__getdate()).split('-'))
+        if os.path.exists(filepath):
+            if stockid not in [int(k.split('/')[1]) for k in pd.HDFStore(filepath).keys()]:
                 anscor, repostcount = self.post_process(stockid, anscor, repostcount)
             else:
                 repostcount = 100
