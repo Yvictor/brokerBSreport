@@ -7,17 +7,20 @@ Created on Dec 18, 2016
 
 import io
 import os
+import sys
 import time
+import random
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as BS
 from datetime import datetime, date, timedelta
 from PIL import Image
+from raven import Client
 import warnings
 import tables
 warnings.filterwarnings('ignore', category=tables.NaturalNameWarning)
 
-from twse import _get_twse_stock_id, captcha_recognize
+from . import _get_twse_stock_id, captcha_recognize
 from utils import func_logging
 
 #FIXED_D = False
@@ -56,6 +59,7 @@ class twseBSreport:
         self.rs = _get_session()
         self.curpath = os.environ.get('CusPath', '')
         self.datenow = self.__getdate()
+        self.sentry_client = Client('https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f2829102661ddc00f6@sentry.io/123315')
         self.notradedata = []  # new
         self.stockidL = _get_twse_stock_id()
         self.captcha_rec = captcha_recognize()
@@ -172,13 +176,14 @@ class twseBSreport:
         table_sort.insert(7, '賣出均價', s_avg_p)
         table_sort.insert(8, '買進比重', b_ratio)
         table_sort.insert(9, '賣出比重', s_ratio)
-        if os.path.exists(self.curpath+'sort.h5'):
-            if table_sort.index.levels[0] not in pd.read_hdf(self.curpath+'sort.h5', key=str(stock_id)).index.levels[0]:
-                table_sort.to_hdf(self.curpath+'sort.h5',
+        file_path = self.curpath+'sort.h5'
+        if os.path.exists(file_path) and stock_id in [int(k.split('/')[1]) for k in pd.HDFStore(file_path).keys()]:
+            if table_sort.index.levels[0] not in pd.read_hdf(file_path, key=str(stock_id)).index.levels[0]:
+                table_sort.to_hdf(file_path,
                                   key=str(stock_id), format='table',
                                   append=True, complevel=9, complib='zlib')
         else:
-            table_sort.to_hdf(self.curpath + 'sort.h5',
+            table_sort.to_hdf(file_path,
                               key=str(stock_id), format='table',
                               append=True, complevel=9, complib='zlib')
 
@@ -218,4 +223,28 @@ class twseBSreport:
         else:
             anscor, repostcount = self.post_process(stockid, anscor, repostcount)
         return stockid, repostcount
+
+    @func_logging(False)
+    def processAll(self):
+        starttime = datetime.now()
+        stlen = len(self.stockidL)
+        self.arrcu = []
+        for i in range(stlen):
+            a = self.singleprocess(self.stockidL[i])
+            if a[1]==150:
+                a = self.singleprocess(self.stockidL[i])
+            ptime = datetime.now()
+            text = "\r上市 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime))
+            sys.stdout.write(text)
+            sys.stdout.flush()
+            if i%200==0:
+                self.sentry_client.captureMessage("上市 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime)))
+            self.arrcu.append(a)
+            if self.arrcu[-1][1] == 0:
+                time.sleep(3)
+            if len(self.arrcu)>3 and self.arrcu[-1][1] == 1 and self.arrcu[-2][1] == 1 and self.arrcu[-3][1] == 1:
+                time.sleep(5)
+        endtime = datetime.now()
+        spendt = str(endtime - starttime)
+        self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
 
