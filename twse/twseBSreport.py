@@ -61,6 +61,8 @@ class twseBSreport:
         self.datenow = self.__getdate()
         self.sentry_client = Client('https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f2829102661ddc00f6@sentry.io/123315')
         self.notradedata = []  # new
+        self.originh5 = False
+        self.sorth5 = False
         self.stockidL = _get_twse_stock_id()
         self.captcha_rec = captcha_recognize()
 
@@ -177,14 +179,21 @@ class twseBSreport:
         table_sort.insert(8, '買進比重', b_ratio)
         table_sort.insert(9, '賣出比重', s_ratio)
         file_path = self.curpath+'sort.h5'
-        if os.path.exists(file_path) and stock_id in [int(k.split('/')[1]) for k in pd.HDFStore(file_path).keys()]:
-            if table_sort.index.levels[0] not in pd.read_hdf(file_path, key=str(stock_id)).index.levels[0]:
-                table_sort.to_hdf(file_path,
-                                  key=str(stock_id), format='table',
+        if os.path.exists(file_path):
+            if self.sorth5==False:
+                self.sorth5 = pd.HDFStore(file_path)
+            elif not self.sorth5.is_open:
+                self.sorth5 = pd.HDFStore(file_path)
+
+            if self.sorth5.is_open and str(stock_id) in self.sorth5:
+                if table_sort.index.levels[0] not in pd.read_hdf(file_path, key=str(stock_id)).index.levels[0]:
+                    table_sort.to_hdf(file_path, key=str(stock_id), format='table',
+                                      append=True, complevel=9, complib='zlib')
+            elif self.sorth5.is_open and str(stock_id) not in self.sorth5:
+                table_sort.to_hdf(file_path, key=str(stock_id), format='table',
                                   append=True, complevel=9, complib='zlib')
         else:
-            table_sort.to_hdf(file_path,
-                              key=str(stock_id), format='table',
+            table_sort.to_hdf(file_path, key=str(stock_id), format='table',
                               append=True, complevel=9, complib='zlib')
 
     @func_logging(False)
@@ -216,7 +225,11 @@ class twseBSreport:
         repostcount = 0
         filepath = self.curpath+'origin_%s.h5'%('').join(str(self.__getdate()).split('-'))
         if os.path.exists(filepath):
-            if stockid not in [int(k.split('/')[1]) for k in pd.HDFStore(filepath).keys()]:
+            if self.originh5==False:
+                self.originh5 = pd.HDFStore(filepath)
+            elif not self.originh5.is_open:
+                self.originh5 = pd.HDFStore(filepath)
+            if str(stockid) not in self.originh5:
                 anscor, repostcount = self.post_process(stockid, anscor, repostcount)
             else:
                 repostcount = 100
@@ -246,5 +259,7 @@ class twseBSreport:
                 time.sleep(5)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
+        self.sorth5.close()
+        self.originh5.close()
         self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
 
