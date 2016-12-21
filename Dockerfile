@@ -31,6 +31,7 @@ CMD [ "/bin/bash" ]
 
 #RUN [ "/bin/bash" , "conda install numpy -y"]
 RUN conda install numpy -y
+RUN conda install Cython -y
 # install python3.5 and essential
 #RUN apt-get update && apt-get install -y python3.5 python-dev wget cron build-essential libxml2-dev libxslt1-dev
 # install pip
