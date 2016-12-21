@@ -22,10 +22,10 @@ class captcha_recognize:
         self.model = model_from_json(open('tpex/TPEX_cnn_captcha.json').read())
         self.model.load_weights('tpex/TPEX_captcha_weights.h5')
 
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss='categorical_crossentropy',
-                           optimizer=sgd,
+                           optimizer='sgd',
                            metrics=['accuracy'])
+
     def preprocess(self ,image):
         X = []
         imgpos = [[0 ,32] ,[25 ,57] ,[49 ,81] ,[72 ,104] ,[98 ,130]]
