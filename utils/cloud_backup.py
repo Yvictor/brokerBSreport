@@ -68,7 +68,7 @@ class gdrive:
     @func_logging(False)
     def _upload_file(self, file_path, folder_id=''):
         drive_service = build('drive', 'v2', http=self.http)
-        file_name, mime_type = self.file_ops(file_path)
+        file_name, mime_type = self._file_ops(file_path)
         media_body = MediaFileUpload(file_path,
                                      mimetype=mime_type,
                                      resumable=True)
