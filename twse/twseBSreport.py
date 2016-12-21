@@ -11,6 +11,7 @@ import sys
 import time
 import random
 import requests
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup as BS
 from datetime import datetime, date, timedelta
@@ -63,6 +64,7 @@ class twseBSreport:
         self.notradedata = []  # new
         self.originh5 = False
         self.sorth5 = False
+        self.ori_file_name = self.curpath + 'origin_%s.h5' % ('').join(str(self.datenow).split('-'))
         self.stockidL = _get_twse_stock_id()
         self.captcha_rec = captcha_recognize()
 
@@ -146,6 +148,7 @@ class twseBSreport:
         table = table[["日期","代號","成交筆數","總成交金額","總成交股數","開盤價","最高價","最低價","收盤價","證券商","成交單價","買進股數","賣出股數"]]
         table = table.sort_index()
         table['證券商']=table['證券商'].map(lambda x: str(x)[0:4])
+        table['代號'] = table['代號'].map(lambda x:str(int(x)))
         table['日期'] = pd.to_datetime(table['日期'])
         self.ori_file_name = self.curpath+'origin_%s.h5'%('').join(str(dat).split('-'))
         table.to_hdf(self.ori_file_name,
@@ -179,6 +182,7 @@ class twseBSreport:
         table_sort.insert(7, '賣出均價', s_avg_p)
         table_sort.insert(8, '買進比重', b_ratio)
         table_sort.insert(9, '賣出比重', s_ratio)
+        table_sort = table_sort.astype(np.float64)
         file_path = self.curpath+'sort.h5'
         if os.path.exists(file_path):
             if self.sorth5==False:
@@ -189,13 +193,13 @@ class twseBSreport:
             if self.sorth5.is_open and str(stock_id) in self.sorth5:
                 if table_sort.index.levels[0] not in pd.read_hdf(file_path, key=str(stock_id)).index.levels[0]:
                     table_sort.to_hdf(file_path, key=str(stock_id), format='table',
-                                      append=True, complevel=9, complib='zlib')
+                                        append=True, complevel=9, complib='zlib')
             elif self.sorth5.is_open and str(stock_id) not in self.sorth5:
                 table_sort.to_hdf(file_path, key=str(stock_id), format='table',
-                                  append=True, complevel=9, complib='zlib')
+                                    append=True, complevel=9, complib='zlib')
         else:
             table_sort.to_hdf(file_path, key=str(stock_id), format='table',
-                              append=True, complevel=9, complib='zlib')
+                                append=True, complevel=9, complib='zlib')
 
     @func_logging(False)
     def post_process(self, stockid, anscor, repostcount):
@@ -260,12 +264,46 @@ class twseBSreport:
                 time.sleep(5)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
-        self.sorth5.close()
+        #self.sorth5.close()
         self.originh5.close()
+        print("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
         self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
         return self.ori_file_name
 
 class convert_data:
 
-    def test(self):
-        pass
+    def sort_origin_table(self, table):
+        buyp = table.apply(lambda row: row['成交單價'] * row['買進股數'], axis=1)
+        table.insert(13, '買進金額', buyp)
+        sellp = table.apply(lambda row: row['成交單價'] * row['賣出股數'], axis=1)
+        table.insert(14, '賣出金額', sellp)
+        table_sort = table.groupby(["日期", "代號", "成交筆數", "總成交金額", "總成交股數", "開盤價", "最高價", "最低價", "收盤價", "證券商"])[
+            ['買進股數', '賣出股數', '買進金額', '賣出金額']].sum()
+        table_sort = table_sort.reset_index(["成交筆數", "總成交金額", "總成交股數", "開盤價", "最高價", "最低價", "收盤價"])
+        table_sort = table_sort[['買進股數', '賣出股數', '買進金額', '賣出金額', "成交筆數", "總成交金額", "總成交股數", "開盤價", "最高價", "最低價", "收盤價"]]
+        b_avg_p = table_sort.apply(lambda row: _divexpectz(row['買進金額'], row['買進股數']), axis=1)
+        s_avg_p = table_sort.apply(lambda row: _divexpectz(row['賣出金額'], row['賣出股數']), axis=1)
+
+        b_ratio = table_sort.apply(lambda row: _divexpectz(row['買進股數'], row['總成交股數']) * 100, axis=1)
+        s_ratio = table_sort.apply(lambda row: _divexpectz(row['賣出股數'], row['總成交股數']) * 100, axis=1)
+
+        bs_share_net = table_sort.apply(lambda row: row['買進股數'] - row['賣出股數'], axis=1)
+        bs_price_net = table_sort.apply(lambda row: row['買進金額'] - row['賣出金額'], axis=1)
+        table_sort.insert(2, '買賣超股數', bs_share_net)
+        table_sort.insert(5, '買賣超金額', bs_price_net)
+        table_sort.insert(6, '買進均價', b_avg_p)
+        table_sort.insert(7, '賣出均價', s_avg_p)
+        table_sort.insert(8, '買進比重', b_ratio)
+        table_sort.insert(9, '賣出比重', s_ratio)
+        table_sort = table_sort.astype(np.float64)
+        table_sort = table_sort.reset_index(['日期', '證券商', '代號'])
+        table_sort['代號'] = table_sort['代號'].map(lambda x: str(int(x)))
+        table_sort = table_sort.set_index(['日期','代號','證券商'])
+        table_sort = table_sort.astype(np.float64)
+        return table_sort
+
+
+
+
+
+
