@@ -5,7 +5,7 @@ FROM ubuntu:16.04
 MAINTAINER yvictor
 
 # install python3.5 and essential
-RUN apt-get update && apt-get install -y python3.5 python3-dev wget cron build-essential
+RUN apt-get update && apt-get install -y python3.5 python-dev wget cron build-essential libxml2-dev libxslt1-dev
 # install pip
 RUN wget https://bootstrap.pypa.io/get-pip.py -O- | python
 # install python-lxml
