@@ -24,13 +24,13 @@ RUN apt-get install -y curl grep sed dpkg && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-ENV PATH /opt/conda/bin:$PATH
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 RUN [ "/bin/bash" ]
 CMD [ "/bin/bash" ]
 
-RUN [ "/bin/bash" , "conda install numpy -y"]
+#RUN [ "/bin/bash" , "conda install numpy -y"]
+RUN conda install numpy -y
 # install python3.5 and essential
 #RUN apt-get update && apt-get install -y python3.5 python-dev wget cron build-essential libxml2-dev libxslt1-dev
 # install pip
