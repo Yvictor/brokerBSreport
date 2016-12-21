@@ -4,8 +4,13 @@ Created on Dec 18, 2016
 @author: Yvictor
 
 '''
-#SENTRY_DNS = os.environ.get('SENTRY_DNS','https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f2829102661ddc00f6@sentry.io/123315')
+import os
 from twse import twseBSreport
+from utils import gdrive
 
 bsreporter = twseBSreport()
-bsreporter.processAll()
+file_name = bsreporter.processAll()
+
+backup = gdrive()
+origin_folder_id = os.environ.get("TWSE_ORIGIN_FOLDER", '0Bxlih4lHCRlmeTRCUkFpd2hkcm8')
+gdrive.upload_file(file_path=file_name, folder_id=origin_folder_id)

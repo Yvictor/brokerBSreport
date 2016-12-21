@@ -16,5 +16,6 @@ setup(
                       "pillow",
                       "raven",
                       "tables",
+                      "google-api-python-client",
                       "h5py",],
 )

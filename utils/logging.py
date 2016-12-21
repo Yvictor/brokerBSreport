@@ -61,7 +61,7 @@ class Logger():
         lgrname = os.environ.get('WORKER_NAME', 'NoWorkerName')
         s = cls(lgrname)
 
-        SENTRY_DNS = os.environ.get('SENTRY_DNS','')
+        SENTRY_DNS = os.environ.get('SENTRY_DNS','https://74c671b467e44539b432644ea4b240c3:0b9cee44e80a4c01a6589ac83dd4a2c1@sentry.io/123918')
         if SENTRY_DNS != '':
             s.init_sentry(SENTRY_DNS)
         return s

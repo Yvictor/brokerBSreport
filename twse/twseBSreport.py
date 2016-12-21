@@ -147,7 +147,8 @@ class twseBSreport:
         table = table.sort_index()
         table['證券商']=table['證券商'].map(lambda x: str(x)[0:4])
         table['日期'] = pd.to_datetime(table['日期'])
-        table.to_hdf(self.curpath+'origin_%s.h5'%('').join(str(dat).split('-')),
+        self.ori_file_name = self.curpath+'origin_%s.h5'%('').join(str(dat).split('-'))
+        table.to_hdf(self.ori_file_name,
                      key = str(stock_id), format = 'table',
                      append = True, complevel = 9, complib = 'zlib')
         return table
@@ -262,4 +263,9 @@ class twseBSreport:
         self.sorth5.close()
         self.originh5.close()
         self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
+        return self.ori_file_name
 
+class convert_data:
+
+    def test(self):
+        pass

@@ -9,6 +9,6 @@ get-bsreport:
 # to do -> need to build cron.env
 get-twse-bsreport:
     #${WORKDIR}/cron/cron.env; python -m twse
-    python -m twse
+    SENTRY_DNS = ${SENTRY_DNS} WORKER_NAME = twse TWSE_ORIGIN_FOLDER = 0Bxlih4lHCRlmeTRCUkFpd2hkcm8 python -m twse
 
 # to do -> get tpex
