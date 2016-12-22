@@ -64,7 +64,7 @@ class twseBSreport:
         self.notradedata = []  # new
         self.originh5 = False
         self.sorth5 = False
-        self.ori_file_name = self.curpath + 'origin_%s.h5' % ('').join(str(self.datenow).split('-'))
+        self.ori_file_name = self.curpath + 'twse_origin_%s.h5' % ('').join(str(self.datenow).split('-'))
         self.stockidL = _get_twse_stock_id()
         self.captcha_rec = captcha_recognize()
 
@@ -77,7 +77,7 @@ class twseBSreport:
         if d.isoweekday() == 7:
             d = d - timedelta(2)
         elif d.isoweekday() == 6:
-            if os.environ.get('FIXED_D', False):
+            if os.environ.get('FIXED_D', False)==False:
                 d = d - timedelta(1)
         return d
 
@@ -150,7 +150,7 @@ class twseBSreport:
         table['證券商']=table['證券商'].map(lambda x: str(x)[0:4])
         table['代號'] = table['代號'].map(lambda x:str(int(x)))
         table['日期'] = pd.to_datetime(table['日期'])
-        self.ori_file_name = self.curpath+'origin_%s.h5'%('').join(str(dat).split('-'))
+        self.ori_file_name = self.curpath+'twse_origin_%s.h5'%('').join(str(dat).split('-'))
         table.to_hdf(self.ori_file_name,
                      key = str(stock_id), format = 'table',
                      append = True, complevel = 9, complib = 'zlib')
@@ -208,8 +208,8 @@ class twseBSreport:
             while len(Capt) != 5:
                 try:
                     Capt = self.OCR()
-                except:
-                    pass
+                except Exception as e:
+                    self.sentry_client.captureMessage("TWSE Captcha occur error \n %s" % str(e))
             anscor = self.postpayload(stockid, Capt, sleeptime=5)
             returnstat(stockid, repostcount)
             repostcount += 1
@@ -228,7 +228,7 @@ class twseBSreport:
     def singleprocess(self, stockid):
         anscor = 0
         repostcount = 0
-        filepath = self.curpath+'origin_%s.h5'%('').join(str(self.__getdate()).split('-'))
+        filepath = self.curpath+'twse_origin_%s.h5'%('').join(str(self.__getdate()).split('-'))
         if os.path.exists(filepath):
             if self.originh5==False:
                 self.originh5 = pd.HDFStore(filepath)
