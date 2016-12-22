@@ -39,7 +39,7 @@ class captcha_recognize:
         return X
 
     def captcha_predict(self ,X):
-        if type(self.model )!= Sequential:
+        if not self.model:
             self.load_model()
         ans = self.model.predict(X)
         captcha =''
