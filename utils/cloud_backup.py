@@ -19,7 +19,7 @@ from utils import func_logging
 
 class gdrive:
     def __init__(self):
-        self.token_file = sys.path[0] + 'auth_token.h5'
+        self.token_file = 'auth_token.h5' # sys.path[0] +
         self.CLIENT_ID = os.environ.get('CLIENT_ID','927735876995-rumfh557885us86uln2oap916r9cbpe0.apps.googleusercontent.com')
         self.CLIENT_SECRET = os.environ.get('CLIENT_SECRET','aHqC0LnYwJl9Fwm6uMshJ88W')
         self.OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive.file'
