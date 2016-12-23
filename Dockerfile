@@ -15,8 +15,8 @@ CMD [ "/bin/bash" ]
 # install pip
 #RUN wget https://bootstrap.pypa.io/get-pip.py -O- | python
 # install python-lxml
-RUN apt-get update && apt-get install -y libxml2-dev libxslt-dev python-lxml
-RUN conda install lxml -y
+# RUN apt-get update && apt-get install -y libxml2-dev libxslt-dev python-lxml
+RUN conda install lxml beautifulsoup4 -y
 
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
