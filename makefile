@@ -3,7 +3,9 @@ SENTRY_DNS := 'https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f282910266
 WORKDIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 get-bsreport:
-	get-twse-bsreport get-tpex-bsreport
+	get-tpex-bsreport
+
+# get-twse-bsreport
 
 # to do -> need to build cron.env
 # ${WORKDIR}/cron/cron.env; python -m twse

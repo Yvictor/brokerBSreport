@@ -12,3 +12,4 @@ SENTRY_DNS='' WORKER_NAME = '' CusPath = '' TPEX_ORIGIN_FOLDER = '' python -m tp
 ```
 
 > `make get-bsreport` will generate 2 file sort.h5 and origin_{date}.h5 the origin one will backup to cloud, sort file will append each date
+> , now sort.h5 need to fix some problem
