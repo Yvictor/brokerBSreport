@@ -4,7 +4,8 @@ Created on Dec 18, 2016
 @author: Yvictor
 
 '''
-
+import os
+os.environ['KERAS_BACKEND'] = 'theano'
 from keras.models import model_from_json
 import numpy as np
 
