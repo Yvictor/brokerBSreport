@@ -20,7 +20,7 @@ CMD [ "/bin/bash" ]
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
 
-RUN pip install lxml
+RUN apt-get install -y python-lxml
 
 RUN python setup.py install
 
