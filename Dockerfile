@@ -16,7 +16,7 @@ CMD [ "/bin/bash" ]
 #RUN wget https://bootstrap.pypa.io/get-pip.py -O- | python
 # install python-lxml
 # RUN apt-get update && apt-get install -y libxml2-dev libxslt-dev python-lxml
-RUN conda install lxml beautifulsoup4 -y
+RUN conda install -c anaconda lxml=3.7.0 -y
 
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
@@ -24,9 +24,8 @@ WORKDIR /brokerBSreport
 
 RUN python setup.py install
 
-RUN python
 # RUN make test-captcha-rec
 RUN make single-test
 
-#RUN make get-bsreport
-
+# RUN make get-bsreport
+CMD make get-bsreport
