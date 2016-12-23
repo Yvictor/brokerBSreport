@@ -5,6 +5,7 @@ Created on Dec 24, 2016
 
 '''
 import random
+from lxml import etree
 from twse import twseBSreport
 from tpex import tpexBSreport
 
