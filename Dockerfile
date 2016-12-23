@@ -15,12 +15,11 @@ CMD [ "/bin/bash" ]
 # install pip
 #RUN wget https://bootstrap.pypa.io/get-pip.py -O- | python
 # install python-lxml
-#RUN apt-get update && apt-get install -y python-lxml
+RUN apt-get update && apt-get install -y libxslt1-dev libxml2 python-lxml
 
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
 
-RUN apt-get install -y python-lxml
 
 RUN python setup.py install
 
