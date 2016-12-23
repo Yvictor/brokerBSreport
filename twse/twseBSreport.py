@@ -122,8 +122,9 @@ class twseBSreport:
         elif self.answ == '查無資料':
             correctanswer = 2
         else:
-            correctanswer = 0
+            correctanswer = 2
             time.sleep(sleeptime)
+            self.sentry_client.captureMessage(str(checkans))
         return correctanswer
 
     @func_logging(False)
@@ -256,7 +257,8 @@ class twseBSreport:
             sys.stdout.write(text)
             sys.stdout.flush()
             if i%200==0:
-                self.sentry_client.captureMessage("上市 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime)))
+                self.sentry_client.captureMessage("上市 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime)),
+                                                  data={'level': 'info'})
             self.arrcu.append(a)
             if self.arrcu[-1][1] == 0:
                 time.sleep(3)
@@ -267,7 +269,7 @@ class twseBSreport:
         #self.sorth5.close()
         self.originh5.close()
         print("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
-        self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
+        self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt), data = {'level': 'info'})
         return self.ori_file_name
 
 class convert_data:

@@ -129,6 +129,8 @@ class tpexBSreport:
             elif urltype == 8:
                 url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
             self.csvf = self.rs.get(url, stream=True, verify=False)
+        elif self.answ == '\n ***因當日最新資訊匯入資料庫，15:30至15:35暫停券商買賣股票資訊查詢*** \n':
+            time.sleep(1000)
         else:
             correctanswer = 2
             self.sentry_client.captureMessage(str(soup))
@@ -303,7 +305,8 @@ class tpexBSreport:
             sys.stdout.write(text)
             sys.stdout.flush()
             if i%200==0:
-                self.sentry_client.captureMessage("\r上櫃 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime)))
+                self.sentry_client.captureMessage("上櫃 {0}/{1} 已完成 {2}%  處理時間: {3}".format(i+1,stlen,round((i+1)/stlen,4)*100,str(ptime-starttime)),
+                                                  data = {'level': 'info'})
             self.arrcu.append(a)
             if self.arrcu[-1][1] == 0:
                 time.sleep(3)
@@ -317,6 +320,6 @@ class tpexBSreport:
         except:
             pass
         print("上櫃股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
-        self.sentry_client.captureMessage("上櫃股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
+        self.sentry_client.captureMessage("上櫃股票交易日報下載完成 \n 花費時間:{0}".format(spendt), data = {'level': 'info'})
         return self.ori_file_name
 
