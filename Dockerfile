@@ -9,6 +9,7 @@ ENV PATH /opt/conda/bin:$PATH
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
 
+RUN apt-get install -y g++
 
 # install python3.5 and essential
 #RUN apt-get update && apt-get install -y python3.5 python-dev wget cron build-essential libxml2-dev libxslt1-dev
@@ -20,7 +21,6 @@ CMD [ "/bin/bash" ]
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
 
-RUN conda install mingw libpython
 
 RUN python setup.py install
 
