@@ -26,7 +26,8 @@ WORKDIR /brokerBSreport
 RUN python setup.py install
 
 # RUN make test-captcha-rec
-RUN make single-test
+# RUN make single-test
 
+RUN make get-twse-bsreport && make get-tpex-bsreport
 # RUN make get-bsreport
 CMD make get-bsreport
