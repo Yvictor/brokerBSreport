@@ -17,6 +17,7 @@ CMD [ "/bin/bash" ]
 # install python-lxml
 # RUN apt-get update && apt-get install -y libxml2-dev libxslt-dev python-lxml
 RUN conda install -c anaconda lxml=3.7.0 -y
+RUN conda install -c anaconda beautifulsoup4=4.5.1
 
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
