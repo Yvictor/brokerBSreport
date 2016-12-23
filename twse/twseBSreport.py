@@ -266,8 +266,11 @@ class twseBSreport:
                 time.sleep(5)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
-        #self.sorth5.close()
-        self.originh5.close()
+        try:
+            self.sorth5.close()
+            self.originh5.close()
+        except:
+            pass
         print("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
         self.sentry_client.captureMessage("上市股票交易日報下載完成 \n 花費時間:{0}".format(spendt), data = {'level': 'info'})
         return self.ori_file_name
