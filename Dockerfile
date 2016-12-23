@@ -20,6 +20,10 @@ CMD [ "/bin/bash" ]
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
 
+RUN conda install mingw libpython
+
 RUN python setup.py install
 
-RUN make get-bsreport
+# RUN make get-bsreport
+
+RUN make test-captcha-rec

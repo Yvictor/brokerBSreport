@@ -11,3 +11,6 @@ get-twse-bsreport:
 
 get-tpex-bsreport:
 	SENTRY_DNS=${SENTRY_DNS} WORKER_NAME=tpex TPEX_ORIGIN_FOLDER=0Bxlih4lHCRlmd0hFVktsY0lrRzg  python -m tpex
+
+test-captcha-rec:
+	python test_captcha_rec.py
