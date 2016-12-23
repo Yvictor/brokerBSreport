@@ -20,9 +20,12 @@ CMD [ "/bin/bash" ]
 COPY . /brokerBSreport
 WORKDIR /brokerBSreport
 
+RUN pip install lxml
 
 RUN python setup.py install
 
-RUN make get-bsreport
-
 # RUN make test-captcha-rec
+RUN make single-test
+
+#RUN make get-bsreport
+

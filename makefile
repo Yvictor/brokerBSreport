@@ -14,3 +14,6 @@ get-tpex-bsreport:
 
 test-captcha-rec:
 	python test_captcha_rec.py
+
+single-test:
+	python single_test.py
