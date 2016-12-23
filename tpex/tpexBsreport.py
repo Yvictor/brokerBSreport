@@ -172,6 +172,7 @@ class tpexBSreport:
         table.index.name = '序'
         table['買進股數'] = table['買進股數'].map(lambda x: _getint(x))
         table['賣出股數'] = table['賣出股數'].map(lambda x: _getint(x))
+        table['成交單價'] = table['成交單價'].map(lambda x: _getint(x))
         table = table.join(ind)
         table[["日期","代號","成交筆數","總成交金額","總成交股數","周轉率(%)","開盤價","最高價","最低價","收盤價"]] = table[["日期","代號","成交筆數","總成交金額","總成交股數","周轉率(%)","開盤價","最高價","最低價","收盤價"]].fillna(method='pad')
         table = table[["日期","代號","成交筆數","總成交金額","總成交股數","周轉率(%)","開盤價","最高價","最低價","收盤價","證券商","成交單價","買進股數","賣出股數"]]
