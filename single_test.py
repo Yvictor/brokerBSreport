@@ -6,7 +6,7 @@ Created on Dec 24, 2016
 '''
 import random
 from twse import twseBSreport
-from tpex import tpexBsreport
+from tpex import tpexBSreport
 
 twsebsreport = twseBSreport()
 print(twsebsreport.OCR())
@@ -16,7 +16,7 @@ while twse_result==0 or twse_result==2:
     twse_result = twsebsreport.postpayload(stock_id, twsebsreport.OCR(), sleeptime=5)
 print(twsebsreport.singleprocess(stock_id))
 
-tpexbsreport = tpexBsreport()
+tpexbsreport = tpexBSreport()
 print(tpexbsreport.OCR())
 tpex_result = 0
 while tpex_result==0 or tpex_result==2:
