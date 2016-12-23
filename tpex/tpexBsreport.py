@@ -62,8 +62,10 @@ class tpexBSreport:
         self.notradedata = []  # new
         self.originh5 = False
         self.sorth5 = False
+        self.ori_name = 'tpex_origin_%s.h5'
+        self.sort_name = 'tpex_sort.h5'
         self.stockidL = _get_tpex_stock_id()
-        self.ori_file_name = self.curpath + 'tpex_origin_%s.h5' % ('').join(str(self.datenow).split('-'))
+        self.ori_file_name = self.curpath + self.ori_name % ('').join(str(self.datenow).split('-'))
         self.captcha_rec = captcha_recognize()
 
     def __getdate(self):
@@ -79,6 +81,7 @@ class tpexBSreport:
                 d = d - timedelta(1)
         return d
 
+    @func_logging(False)
     def getCaptcha(self):
         sleeptime = 30
         captcha = None
@@ -90,10 +93,12 @@ class tpexBSreport:
                 sleeptime+=300
         return captcha.content
 
+    @func_logging(False)
     def OCR(self):
         captcha_img = Image.open(io.BytesIO(self.getCaptcha()))
         return captcha_img, self.captcha_rec.captcha_predict(self.captcha_rec.preprocess(captcha_img))
 
+    @func_logging(False)
     def postpayload(self, stockid, captcha, urltype):
         payload = {
             'stk_code': '%s' % str(stockid),
@@ -125,10 +130,11 @@ class tpexBSreport:
                 url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
             self.csvf = self.rs.get(url, stream=True, verify=False)
         else:
-            correctanswer = 0
+            correctanswer = 2
+            self.sentry_client.captureMessage(str(soup))
         return correctanswer
 
-
+    @func_logging(False)
     def _process_ori_data(self, stockid):
         dat = date(int(self.dtda[0])+1911,int(self.dtda[1]),int(self.dtda[2]))
         tda = int(self.ind[1][1])
@@ -171,12 +177,10 @@ class tpexBSreport:
         table['證券商']=table['證券商'].map(lambda x: str(x).split(' ')[0])
         table['代號'] = table['代號'].map(lambda x:str(int(x)))
 
-        self.ori_file_name = self.curpath+'tpex_origin_%s.h5'%('').join(str(dat).split('-'))
-        table.to_hdf(self.ori_file_name,
-                     key = str(stockid), format = 'table',
-                     append = True, complevel = 9, complib = 'zlib')
+        self.ori_file_name = self.curpath+ self.ori_name %('').join(str(dat).split('-'))
         return table
 
+    @func_logging(False)
     def _process_sort_data(self, table):
         buyp = table.apply(lambda row: row['成交單價'] * row['買進股數'], axis=1)
         table.insert(13, '買進金額', buyp)
@@ -201,13 +205,17 @@ class tpexBSreport:
         table_sort.insert(9, '賣出比重', s_ratio)
         return table_sort
 
-
+    @func_logging(False)
     def processdata(self,stockid):
         table = self._process_ori_data(stockid)
 
         table_sort = self._process_sort_data(table).astype(np.float64)
 
-        file_path = self.curpath+'sort.h5'
+        table.to_hdf(self.ori_file_name,
+                     key = str(stockid), format = 'table',
+                     append = True, complevel = 9, complib = 'zlib')
+
+        file_path = self.curpath+ self.sort_name
         if os.path.exists(file_path):
             if self.sorth5==False:
                 self.sorth5 = pd.HDFStore(file_path)
@@ -225,7 +233,7 @@ class tpexBSreport:
             table_sort.to_hdf(file_path, key=str(stockid), format='table',
                                 append=True, complevel=9, complib='zlib')
 
-
+    @func_logging(False)
     def post_process(self, stockid, anscor=0, repostcount=0, changeurltype=0):
         while anscor == 0:
             if changeurltype == 0:
@@ -244,7 +252,7 @@ class tpexBSreport:
             if anscor == 2:
                 self.notradedata.append(stockid)
                 break
-            if repostcount > 150:
+            if repostcount > 10:
                 repostcount = 150
                 time.sleep(random.choice([2.8, 3.2, 3.8, 4.1, 4.7]))
                 break
@@ -254,17 +262,19 @@ class tpexBSreport:
                 time.sleep(random.choice([1.3, 1.8, 1.4, 1.1, 1.5]))
             if anscor == 1 and int(self.dtda[0]) > 85:
                 try:
-                    self.processdata(stockid)
+                    self._process_ori_data(stockid)
                     changeurltype = 0
                 except Exception as e:
                     changeurltype = 1
                     anscor = 0
                     self.sentry_client.captureMessage("TPEX Process Data Occur Error \n %s" % str(e))
+                    continue
+                self.processdata(stockid)
         return repostcount
 
-
+    @func_logging(False)
     def singleprocess(self, stockid):
-        filepath = self.curpath + 'tpex_tpex_origin_%s.h5' % ('').join(str(self.__getdate()).split('-'))
+        filepath = self.curpath + self.ori_name % ('').join(str(self.__getdate()).split('-'))
         if os.path.exists(filepath):
             if self.originh5 == False:
                 self.originh5 = pd.HDFStore(filepath)
@@ -278,7 +288,7 @@ class tpexBSreport:
             repostcount = self.post_process(stockid)
         return stockid, repostcount
 
-
+    @func_logging(False)
     def processAll(self):
         starttime = datetime.now()
         stlen = len(self.stockidL)
@@ -301,7 +311,11 @@ class tpexBSreport:
                 time.sleep(4)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
-        self.originh5.close()
+        try:
+            self.originh5.close()
+            self.sorth5.close()
+        except:
+            pass
         print("上櫃股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
         self.sentry_client.captureMessage("上櫃股票交易日報下載完成 \n 花費時間:{0}".format(spendt))
         return self.ori_file_name
