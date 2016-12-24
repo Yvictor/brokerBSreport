@@ -57,6 +57,7 @@ class tpexBSreport:
     def __init__(self):
         self.rs = _get_session()
         self.curpath = os.environ.get('CusPath', '')
+        self.set_sleep = os.environ.get('SLP', 1)
         self.datenow = self.__getdate()
         self.sentry_client = Client('https://6434c22a9d784459938a63e12ff0ae93:f85135cdee9242faa7560a1e9c56ece3@sentry.io/124308')
         self.notradedata = []  # new
@@ -89,6 +90,8 @@ class tpexBSreport:
             try:
                 captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php',stream=True, verify=False)
             except:
+                if sleeptime>300 and sleeptime< 999:
+                    self.sentry_client.captureMessage("IP was baned, SLP setting: %s"%str(self.set_sleep), data={'level': 'warn'})
                 time.sleep(sleeptime)
                 sleeptime+=300
         return captcha.content
@@ -257,12 +260,12 @@ class tpexBSreport:
                 break
             if repostcount > 10:
                 repostcount = 150
-                time.sleep(random.choice([2.8, 3.2, 3.8, 4.1, 4.7]))
+                time.sleep(random.choice([2.8, 3.2, 3.8, 4.1, 4.7])/self.set_sleep)
                 break
-            time.sleep(random.choice([1.3, 2.2 ,2.7, 3.1, 3.8]))
+            time.sleep(random.choice([1.3, 2.2 ,2.7, 3.1, 3.8])/self.set_sleep)
             while anscor == 1 and int(self.dtda[0]) < 85:
                 anscor = self.postpayload(stockid, Capt, urltype)
-                time.sleep(random.choice([1.3, 1.8, 1.4, 1.1, 1.5]))
+                time.sleep(random.choice([1.3, 1.8, 1.4, 1.1, 1.5])/self.set_sleep)
             if anscor == 1 and int(self.dtda[0]) > 85:
                 try:
                     self._process_ori_data(stockid)
@@ -310,9 +313,9 @@ class tpexBSreport:
                                                   data = {'level': 'info'})
             self.arrcu.append(a)
             if self.arrcu[-1][1] == 0:
-                time.sleep(3)
+                time.sleep(3/self.set_sleep)
             if len(self.arrcu)>3 and self.arrcu[-1][1] <= 1 and self.arrcu[-2][1] <= 1 and self.arrcu[-3][1] <= 1:
-                time.sleep(4)
+                time.sleep(5/self.set_sleep)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
         try:

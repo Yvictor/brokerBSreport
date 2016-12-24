@@ -59,6 +59,7 @@ class twseBSreport:
         self.urltwse = 'http://bsr.twse.com.tw/bshtm/'
         self.rs = _get_session()
         self.curpath = os.environ.get('CusPath', '')
+        self.set_sleep = os.environ.get('SLP', 1)
         self.datenow = self.__getdate()
         self.sentry_client = Client('https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f2829102661ddc00f6@sentry.io/123315')
         self.notradedata = []  # new
@@ -118,12 +119,12 @@ class twseBSreport:
             self.soupdata = BS(resq.text, "lxml")
         elif self.answ == '驗證碼錯誤!' or self.answ == '驗證碼已逾期.':
             correctanswer = 0
-            time.sleep(sleeptime)
+            time.sleep(sleeptime/self.set_sleep)
         elif self.answ == '查無資料':
             correctanswer = 2
         else:
             correctanswer = 2
-            time.sleep(sleeptime)
+            time.sleep(sleeptime/self.set_sleep)
             self.sentry_client.captureMessage(str(checkans))
         return correctanswer
 
@@ -220,7 +221,7 @@ class twseBSreport:
             if repostcount > 150:
                 repostcount = 150
                 break
-            time.sleep(random.choice([2.8, 3.2, 3.8, 4.1, 4.7]))
+            time.sleep(random.choice([2.8, 3.2, 3.8, 4.1, 4.7])/self.set_sleep)
             if anscor == 1:
                 self.processdata(stockid)
         return anscor, repostcount
@@ -261,9 +262,9 @@ class twseBSreport:
                                                   data={'level': 'info'})
             self.arrcu.append(a)
             if self.arrcu[-1][1] == 0:
-                time.sleep(3)
+                time.sleep(3/self.set_sleep)
             if len(self.arrcu)>3 and self.arrcu[-1][1] == 1 and self.arrcu[-2][1] == 1 and self.arrcu[-3][1] == 1:
-                time.sleep(5)
+                time.sleep(5/self.set_sleep)
         endtime = datetime.now()
         spendt = str(endtime - starttime)
         try:
