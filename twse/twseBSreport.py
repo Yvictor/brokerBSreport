@@ -59,7 +59,7 @@ class twseBSreport:
         self.urltwse = 'http://bsr.twse.com.tw/bshtm/'
         self.rs = _get_session()
         self.curpath = os.environ.get('CusPath', '')
-        self.set_sleep = os.environ.get('SLP', 1)
+        self.set_sleep = float(os.environ.get('SLP', 1))
         self.datenow = self.__getdate()
         self.sentry_client = Client('https://6db9585c13094fe0a6daf59ba35bf0f1:398fc0f8893c41f2829102661ddc00f6@sentry.io/123315')
         self.notradedata = []  # new

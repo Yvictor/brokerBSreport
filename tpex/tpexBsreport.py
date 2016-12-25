@@ -57,7 +57,7 @@ class tpexBSreport:
     def __init__(self):
         self.rs = _get_session()
         self.curpath = os.environ.get('CusPath', '')
-        self.set_sleep = os.environ.get('SLP', 1)
+        self.set_sleep = float(os.environ.get('SLP', 1))
         self.datenow = self.__getdate()
         self.sentry_client = Client('https://6434c22a9d784459938a63e12ff0ae93:f85135cdee9242faa7560a1e9c56ece3@sentry.io/124308')
         self.notradedata = []  # new
