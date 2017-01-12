@@ -88,7 +88,7 @@ class tpexBSreport:
         captcha = None
         while str(captcha) != '<Response [200]>':
             try:
-                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php',stream=True, verify=False)
+                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php', verify=False)#,stream=True
             except:
                 if sleeptime>300 and sleeptime< 999:
                     self.sentry_client.captureMessage("IP was baned, SLP setting: %s"%str(self.set_sleep), data={'level': 'warn'})
@@ -131,7 +131,7 @@ class tpexBSreport:
                 url = urlbig5 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
             elif urltype == 8:
                 url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
-            self.csvf = self.rs.get(url, stream=True, verify=False)
+            self.csvf = self.rs.get(url, verify=False)#, stream=True
         elif self.answ == '\n ***因當日最新資訊匯入資料庫，15:30至15:35暫停券商買賣股票資訊查詢*** \n':
             time.sleep(1000)
         else:
