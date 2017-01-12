@@ -118,6 +118,8 @@ class tpexBSreport:
             else:
                 os.makedirs('error_captcha/tpex')
                 captcha[0].save('error_captcha/tpex/%s.png' % captcha[1], format='png')
+        elif self.answ == '\n ***驗證碼過期，請重新查詢。*** \n':
+            correctanswer = 0
         elif self.answ == '\n ***該股票該日無交易資訊*** \n':
             return 2
         elif self.answ[0:7] == '\n\n\n交易日期':
@@ -136,7 +138,7 @@ class tpexBSreport:
             time.sleep(1000)
         else:
             correctanswer = 2
-            self.sentry_client.captureMessage(str(soup))
+            self.sentry_client.captureMessage(self.answ)
         return correctanswer
 
     @func_logging(False)
