@@ -27,7 +27,7 @@ RUN python setup.py install
 # RUN make single-test
 
 #RUN make get-twse-bsreport & make get-tpex-bsreport &
-#RUN make get-tpex-bsreport
+RUN make get-tpex-bsreport
 #RUN make get-twse-bsreport
-RUN make get-bsreport
+#RUN make get-bsreport
 CMD make get-bsreport
