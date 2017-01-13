@@ -88,6 +88,7 @@ class tpexBSreport:
         captcha = None
         while str(captcha) != '<Response [200]>':
             try:
+                self.rs = _get_session()
                 captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php', verify=False)#,stream=True
             except:
                 if sleeptime>300 and sleeptime< 999:
