@@ -92,7 +92,7 @@ class tpexBSreport:
                 res.encoding = 'utf-8'
                 soup = BS(res.text, "lxml")
                 enname = soup.select('.form-inline input')[0].attrs['value']
-                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php?n=%s'%enname, verify=False)#,stream=True
+                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum_output.php?n=%s'%enname, verify=False)#,stream=True
             except:
                 if sleeptime>300 and sleeptime< 999:
                     self.sentry_client.captureMessage("IP was baned, SLP setting: %s"%str(self.set_sleep), data={'level': 'warn'})
