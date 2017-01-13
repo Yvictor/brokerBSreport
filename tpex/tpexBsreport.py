@@ -88,23 +88,28 @@ class tpexBSreport:
         captcha = None
         while str(captcha) != '<Response [200]>':
             try:
-                self.rs = _get_session()
-                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php', verify=False)#,stream=True
+                res = self.rs.get('http://www.tpex.org.tw/web/stock/aftertrading/broker_trading/brokerBS.php')
+                res.encoding = 'utf-8'
+                soup = BS(res.text, "lxml")
+                enname = soup.select('.form-inline input')[0].attrs['value']
+                captcha = self.rs.get('http://www.tpex.org.tw/web/inc/authnum.php?n=%s'%enname, verify=False)#,stream=True
             except:
                 if sleeptime>300 and sleeptime< 999:
                     self.sentry_client.captureMessage("IP was baned, SLP setting: %s"%str(self.set_sleep), data={'level': 'warn'})
                 time.sleep(sleeptime)
                 sleeptime+=300
-        return captcha.content
+        return captcha.content, enname
 
     @func_logging(False)
     def OCR(self):
-        captcha_img = Image.open(io.BytesIO(self.getCaptcha()))
-        return captcha_img, self.captcha_rec.captcha_predict(self.captcha_rec.preprocess(captcha_img))
+        capt = self.getCaptcha()
+        captcha_img = Image.open(io.BytesIO(capt[0]))
+        return captcha_img, self.captcha_rec.captcha_predict(self.captcha_rec.preprocess(captcha_img)), capt[1]
 
     @func_logging(False)
     def postpayload(self, stockid, captcha, urltype):
         payload = {
+            'enname' : captcha[2],
             'stk_code': '%s' % str(stockid),
             'auth_num': captcha[1]
         }
