@@ -135,11 +135,12 @@ class tpexBSreport:
             stkd = ('').join(self.dtda)
             urlbig5 = 'http://www.tpex.org.tw/web/stock/aftertrading/broker_trading/download_ALLCSV.php?curstk='
             urlutf8 = 'http://www.tpex.org.tw/web/stock/aftertrading/broker_trading/download_ALLCSV_UTF-8.php?curstk='
-            if urltype == 5:
-                url = urlbig5 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
-            elif urltype == 8:
-                url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
-            self.csvf = self.rs.get(url, verify=False)#, stream=True
+            #if urltype == 5:
+            big5furl = urlbig5 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
+            #elif urltype == 8:
+            utf8furl = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
+            self.csvfbig5 = self.rs.get(big5furl, verify=False)#, stream=True
+            self.csvfutf8 = self.rs.get(utf8furl, verify=False)
         elif self.answ == '\n ***因當日最新資訊匯入資料庫，15:30至15:35暫停券商買賣股票資訊查詢*** \n':
             time.sleep(1000)
         else:
@@ -170,7 +171,10 @@ class tpexBSreport:
              "收盤價":cp}
         ind = pd.DataFrame(d, index=[1])
         ind.index.name = '序號'
-        tablens = pd.read_csv(io.StringIO(self.csvf.text.split('證券代碼')[1][7:]),encoding='utf-8')
+        try:
+            tablens = pd.read_csv(io.StringIO(self.csvfbig5.text.split('證券代碼')[1][7:]),encoding='big5')
+        except:
+            tablens = pd.read_csv(io.StringIO(self.csvfutf8.text.split('證券代碼')[1][7:]),encoding='utf-8')
         table00 = tablens[['序號','券商','價格','買進股數','賣出股數']]
         table01 = tablens[['序號.1','券商.1','價格.1','買進股數.1','賣出股數.1']]
         table00.columns = ['序號','證券商','成交單價','買進股數','賣出股數']
@@ -280,7 +284,7 @@ class tpexBSreport:
                     changeurltype = 0
                 except Exception as e:
                     changeurltype = 1
-                    anscor = 0
+                    # anscor = 0
                     self.sentry_client.captureMessage("TPEX Process Data Occur Error \n %s" % str(e))
                     continue
                 self.processdata(stockid)
