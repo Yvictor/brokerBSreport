@@ -136,9 +136,9 @@ class tpexBSreport:
             urlbig5 = 'http://www.tpex.org.tw/web/stock/aftertrading/broker_trading/download_ALLCSV.php?curstk='
             urlutf8 = 'http://www.tpex.org.tw/web/stock/aftertrading/broker_trading/download_ALLCSV_UTF-8.php?curstk='
             if urltype == 5:
-                url = urlbig5 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
+                url = urlbig5 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
             elif urltype == 8:
-                url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1]
+                url = urlutf8 + str(stockid) + '&stk_date=' + stkd + '&auth=' + captcha[1] + '&n=' + captcha[2]
             self.csvf = self.rs.get(url, verify=False)#, stream=True
         elif self.answ == '\n ***因當日最新資訊匯入資料庫，15:30至15:35暫停券商買賣股票資訊查詢*** \n':
             time.sleep(1000)
